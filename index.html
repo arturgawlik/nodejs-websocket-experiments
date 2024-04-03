@@ -7,7 +7,28 @@
 </head>
 <body>
     <script>
-        const webSocket = new WebSocket("/ws");
+        const webSocket = new WebSocket("ws://localhost:8000/ws");
+        webSocket.addEventListener("open", (event) => {
+            console.log("websocket open: ", event);
+
+            webSocket.send("helo");
+            setTimeout(() => {
+                webSocket.send("from user agent");
+            }, 5000);
+        });
+
+        webSocket.addEventListener("message", event => {
+            console.log("message from server: ", event);
+        });
+
+        webSocket.addEventListener("close", (event) => {
+            console.log("websocket closed: ", event);
+        });
+
+        webSocket.addEventListener("error", (event) => {
+            console.log("websocket error: ", event);
+        });
+        
     </script>
 </body>
 </html>
