@@ -6,12 +6,13 @@
     <title>websocket experiments</title>
 </head>
 <body>
+    <p>hello websockets</p>
     <script>
-        const webSocket = new WebSocket("ws://localhost:8000/ws");
+        const webSocket = new WebSocket("ws://localhost/ws");
         webSocket.addEventListener("open", (event) => {
             console.log("websocket open: ", event);
 
-            webSocket.send("helo");
+            webSocket.send("hello");
             setTimeout(() => {
                 webSocket.send("from user agent");
             }, 5000);
