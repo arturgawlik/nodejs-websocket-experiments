@@ -11,16 +11,17 @@ createServer((socket) => {
     const joinedChunks = recivedDataChunks.join();
     if (shouldParseHTTPHead(joinedChunks)) {
       const parsedHTTP = parseHTTP(joinedChunks);
-      if (parsedHTTP.headers["sec-websocket-key"]) {
+      if (isWebsocketHandshakeRequest(parsedHTTP)) {
         // handle WS
         // handshake
-        const secWebsocketAccept = calcSecWebsocketAccept(
-          parsedHTTP.headers["sec-websocket-key"]
-        );
-        socket.write("HTTP/1.1 101 Web Socket Protocol Handshake\r\n");
+        socket.write("HTTP/1.1 101 Switching Protocols\r\n");
         socket.write("Upgrade: WebSocket\r\n");
         socket.write("Connection: Upgrade\r\n");
-        socket.write(`Sec-WebSocket-Accept: ${secWebsocketAccept}\r\n`);
+        socket.write(
+          `Sec-WebSocket-Accept: ${calcSecWebsocketAccept(
+            parsedHTTP.headers["sec-websocket-key"]
+          )}\r\n`
+        );
         socket.write("\r\n");
       } else {
         // return index.html
@@ -33,10 +34,22 @@ createServer((socket) => {
 });
 
 /**
+ * Checks is websocket request
+ * @param {ReturnType<parseHTTP>} parsedHTTP
+ */
+function isWebsocketHandshakeRequest(parsedHTTP) {
+  if (!parsedHTTP) {
+    return false;
+  }
+
+  return !!parsedHTTP.headers["sec-websocket-key"];
+}
+
+/**
+ * Checks that whole "head" was recived which is indicated by double new line
  * @param {string} data
  */
 function shouldParseHTTPHead(data) {
-  // double new line indicates that whole "head" was recived
   return data.includes("\r\n\r\n");
 }
 
@@ -61,10 +74,7 @@ function parseHTTP(data) {
     if (line.includes(": ")) {
       // parse header
       const [name, value] = line.split(": ");
-      result.headers[name.toLowerCase().trimStart().trimEnd()] = value
-        .toLowerCase()
-        .trimStart()
-        .trimEnd();
+      result.headers[name.toLowerCase().trim()] = value.toLowerCase().trim();
     }
   }
 
@@ -72,6 +82,7 @@ function parseHTTP(data) {
 }
 
 /**
+ * Calculates value for Sec-WebSocket-Accept handshake response header
  * @param {string} secWebsocketKey
  */
 function calcSecWebsocketAccept(secWebsocketKey) {
