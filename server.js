@@ -35,6 +35,10 @@ function decodeFrame(data) {
   console.log("content length: ", contentLength);
 }
 
+/**
+ * Decodes content length from frame
+ * @param {import("node:buffer").Buffer} data
+ */
 function readContentLength(data) {
   const dataView = new DataView(data.buffer);
   // read two bytes that contains length
