@@ -46,7 +46,7 @@ function readContentLength(data) {
   // shift right by 8 to position bits 9-15 as bits 1-7 of the resulting number
   const shifted = twoBytes >> 8;
   // extract bits 1-7, which are originally bits 9-15
-  let extractedLength = shifted & 0x7f; // 01111111
+  let extractedLength = shifted & 0b01111111; // 01111111
 
   if (extractedLength > 125) {
     // need's to read more
