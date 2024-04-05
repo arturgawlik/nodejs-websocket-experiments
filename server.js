@@ -28,7 +28,7 @@ httpServer.listen(80, () => {
 
 /**
  * Decodes frame
- * @param {import("node:buffer").Buffer} data
+ * @param {import("node:buffer").Buffer} data is ArrayBuffer in a Network (Unix) byte order, which means BigEndian notation (most significat byte first).
  */
 function decodeFrame(data) {
   const contentLength = readContentLength(data);
@@ -41,15 +41,21 @@ function decodeFrame(data) {
  */
 function readContentLength(data) {
   const dataView = new DataView(data.buffer);
-  // read two bytes that contains length
-  const twoBytes = dataView.getUint16(0, true);
-  // shift right by 8 to position bits 9-15 as bits 1-7 of the resulting number
-  const shifted = twoBytes >> 8;
+  // get second byte
+  // because we need to read length from 9-15 bits
+  // which is in second byte
+  const secondByte = dataView.getUint8(1);
   // extract bits 1-7, which are originally bits 9-15
-  let extractedLength = shifted & 0b01111111; // 01111111
+  let extractedLength = secondByte & 0b01111111;
+  // 10000101
+  // 01111111
+  // 00000101
 
-  if (extractedLength > 125) {
+  if (extractedLength === 126) {
     // need's to read more
+    const secondThridForthByte = dataView.getUint32(1);
+    extractedLength = secondThridForthByte & 0b11111111111111110000000;
+    extractedLength = secondThridForthByte >> 7;
   }
 
   return extractedLength;
