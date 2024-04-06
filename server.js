@@ -47,9 +47,6 @@ function readContentLength(data) {
   const secondByte = dataView.getUint8(1);
   // extract bits 1-7, which are originally bits 9-15
   let extractedLength = secondByte & 0b01111111;
-  // 10000101
-  // 01111111
-  // 00000101
 
   if (extractedLength === 126) {
     // need's to read more
