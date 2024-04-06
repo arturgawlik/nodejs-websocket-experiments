@@ -53,9 +53,11 @@ function readContentLength(data) {
 
   if (extractedLength === 126) {
     // need's to read more
-    const secondThridForthByte = dataView.getUint32(1);
-    extractedLength = secondThridForthByte & 0b11111111111111110000000;
-    extractedLength = secondThridForthByte >> 7;
+    const fisrtSecondThridForthByte = dataView.getUint32(0);
+    // need to read 16-31 bit (inclusive)
+    extractedLength =
+      (fisrtSecondThridForthByte >> 15) & 0b000000001111111111111111;
+    console.log(extractedLength);
   }
 
   return extractedLength;
