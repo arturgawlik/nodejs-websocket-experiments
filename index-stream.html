@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>websocket experiments</title>
+</head>
+<body>
+    <p>hello websockets</p>
+    <script>
+        const wss = new WebsocketStream("ws://localhost");
+        const { readable, writable } = await wss.opened;
+        console.log('websocket open');
+        const reader = readable.getReader();
+        const writer = readable.getWriter();
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+                break;
+            }
+            console.log(value)
+        }
+    </script>
+</body>
+</html>
