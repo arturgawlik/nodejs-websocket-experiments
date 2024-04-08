@@ -15,6 +15,7 @@ httpServer.on("upgrade", (req, socket, head) => {
       req.headers["sec-websocket-key"]
     )}\r\n`
   );
+  // head need's to end with double new line
   socket.write("\r\n");
 
   socket.on("data", (data) => {
@@ -49,11 +50,11 @@ function readContentLength(data) {
   let extractedLength = secondByte & 0b01111111;
 
   if (extractedLength === 126) {
-    // need's to read more
-    const fourBytes = dataView.getUint32(0);
-    // need to read 9-31 bit (inclusive)
-    extractedLength = fourBytes >> 8;
-    console.log(extractedLength);
+    // for this case need to read 16-31 bits
+    extractedLength = dataView.getUint16(2);
+  } else if (extractedLength === 127) {
+    // for this case need to read 12-63 bits
+    extractedLength = dataView.getBigUint64(4);
   }
 
   return extractedLength;
