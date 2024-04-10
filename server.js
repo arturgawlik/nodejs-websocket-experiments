@@ -43,20 +43,25 @@ function decodeFrame(data) {
       byteOffsetForNextReads + 4
     );
 
-    // Perform an XOR on the mask
+    // Perform an XOR on the mask to retrive finall payload bytes
     const decodedPayload = Uint8Array.from(
       encodedPayload,
       (elt, i) => elt ^ maskKey[i % 4]
     );
-    const textEncoder = new TextDecoder();
-    return textEncoder.decode(decodedPayload);
+
+    return new TextDecoder().decode(decodedPayload);
+  } else {
+    throw new Error(
+      "Mask bit need's to be set! Server don't support non masked payload."
+    );
   }
-  // console.log("data: ", data);
 }
 
 /**
  * Decodes payload from frame
  * @param {import("node:buffer").Buffer} data
+ * @param {number} length
+ * @param {number} byteOffset
  */
 function readEncodedPayload(data, length, byteOffset) {
   // mask bit is encoded in 8 bit
@@ -75,7 +80,6 @@ function readEncodedPayload(data, length, byteOffset) {
  */
 function readMaskKey(data, byteOffset) {
   const dataView = new DataView(data.buffer);
-  // const maskKey = dataView.getUint32(12);
   const maskKey = [];
   for (let index = 0; index < 4; index++) {
     maskKey.push(dataView.getUint8(byteOffset + index));
